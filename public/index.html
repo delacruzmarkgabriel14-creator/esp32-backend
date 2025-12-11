@@ -1,54 +1,33 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>ESP32 Live Data</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 20px;
-        }
-        .box {
-            padding: 15px;
-            border: 1px solid #ccc;
-            width: 250px;
-            margin-bottom: 10px;
-        }
-    </style>
-</head>
-<body>
+const express = require("express");
+const app = express();
+const port = process.env.PORT || 3000;
 
-    <h1>ESP32 Live Sensor Data</h1>
+// For parsing JSON
+app.use(express.json());
 
-    <div class="box">
-        <strong>Temperature:</strong>
-        <span id="temp">Loading...</span> °C
-    </div>
+// Serve static files from "public" folder
+app.use(express.static("public"));
 
-    <div class="box">
-        <strong>Humidity:</strong>
-        <span id="hum">Loading...</span> %
-    </div>
+// Example data storage
+let latestData = {
+  temperature: null,
+  humidity: null,
+  fan: null
+};
 
-    <div class="box">
-        <strong>Fan Status:</strong>
-        <span id="fan">Loading...</span>
-    </div>
+// API route for ESP32 to POST data
+app.post("/api/data", (req, res) => {
+  latestData = req.body;
+  console.log("Received:", latestData);
+  res.send("Data stored");
+});
 
-<script>
-function updateData() {
-    fetch("/api/data")
-        .then(res => res.json())
-        .then(data => {
-            document.getElementById("temp").innerText = data.temperature ?? "No data";
-            document.getElementById("hum").innerText = data.humidity ?? "No data";
-            document.getElementById("fan").innerText = data.fan ? "ON" : "OFF";
-        })
-        .catch(err => console.log("Error:", err));
-}
+// API route for frontend to GET latest data
+app.get("/api/data", (req, res) => {
+  res.json(latestData);
+});
 
-setInterval(updateData, 1000); // refresh every second
-updateData();
-</script>
-
-</body>
-</html>
+// Start server
+app.listen(port, () => {
+  console.log(`Server running on port ${port}`);
+});
