@@ -1,12 +1,37 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Website</title>
+  <title>ESP32 Dashboard</title>
+  <style>
+    body { font-family: Arial; text-align: center; padding: 50px; }
+    .box { margin: 20px; padding: 20px; border: 1px solid #ccc; display: inline-block; }
+    .on { color: green; font-weight: bold; }
+    .off { color: red; font-weight: bold; }
+  </style>
 </head>
 <body>
-    <h1>Welcome to My Website!</h1>
-    <p>This website is deployed using Render.</p>
+  <h1>ESP32 Sensor Dashboard</h1>
+  <div class="box">
+    <p>Temperature: <span id="temp">--</span> °C</p>
+    <p>Humidity: <span id="hum">--</span> %</p>
+    <p>Fan Status: <span id="fan">--</span></p>
+  </div>
+
+  <script>
+    async function fetchData() {
+      try {
+        const res = await fetch('/api/data');
+        const data = await res.json();
+        document.getElementById('temp').innerText = data.temperature ?? '--';
+        document.getElementById('hum').innerText = data.humidity ?? '--';
+        document.getElementById('fan').innerText = data.fan ? 'ON' : 'OFF';
+        document.getElementById('fan').className = data.fan ? 'on' : 'off';
+      } catch(err) {
+        console.error('Error fetching data:', err);
+      }
+    }
+    setInterval(fetchData, 1000); // Update every 1 second
+    fetchData();
+  </script>
 </body>
 </html>
